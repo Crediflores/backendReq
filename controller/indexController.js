@@ -81,6 +81,22 @@ const ingresoUser=async (req, res)=>{
 }
  
 
+const changePassword=async (req, res)=>{
+    var {token, password}=req.body
+
+    try{
+
+        const decoded=jwt.verify(token, 'secretKey')
+        const iduser=decoded.id_user
+        contrasenaEncriptada=await convertirContrasena(password)
+        const response=await Pool.query("update tUser set clave=$1 where iduser=$2",[contrasenaEncriptada, iduser])
+        
+        return res.status(200).send("La contraseña se pudo cambiar");
+
+    }catch(error){
+        return res.status(401).send("No es posible realizar el cambio de clave");
+    }
+}
 
 
 
@@ -94,4 +110,4 @@ async function convertirContrasena(password){
     return password;
 }
 
-module.exports={RegistroUser, ingresoUser}
+module.exports={RegistroUser, ingresoUser, changePassword}
