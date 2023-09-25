@@ -52,23 +52,31 @@ async function validarExistencia(documento){
 
 const ingresoUser=async (req, res)=>{
     var {usuario, contrasena}=req.body;
+
+    try{
     
     const palabraTextoPlano=contrasena
 
     const consulta=await Pool.query("SELECT * FROM tUser WHERE usuario=$1",[usuario]);
 
     const datos=consulta.rows;
-
     const palabraSecretaEncriptada=datos[0].clave;
     
     palabraSecretaValida=await bcrypt.compare(palabraTextoPlano,palabraSecretaEncriptada);
 
-
     if(palabraSecretaValida){
-        return res.status(200).send("Acceso permitido");
+
+        const token=jwt.sign({id_user:datos[0].iduser}, 'secretKey')
+        var datosUser = { idUser: datos[0].iduser, usuario:datos[0].usuario, usuario:datos[0].usuario, idPerfil:datos[0].idperfil };
+        return res.status(200).json({token, datosUser})
     }else{
         return res.status(401).send("Contraseña incorrecta");
     }
+
+ }catch(error){
+     return res.status(401).send("El usuario no existe");
+ 
+ }
 
 }
  
