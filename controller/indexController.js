@@ -91,7 +91,7 @@ const changePassword=async (req, res)=>{
         contrasenaEncriptada=await convertirContrasena(password)
         const response=await Pool.query("update tUser set clave=$1 where iduser=$2",[contrasenaEncriptada, iduser])
         
-        return res.status(200).send("La contraseña se pudo cambiar");
+        return res.status(200).json({"Aprobacion":"La contraseña se pudo cambiar"});
 
     }catch(error){
         return res.status(401).send("No es posible realizar el cambio de clave");
