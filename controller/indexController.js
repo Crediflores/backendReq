@@ -5,6 +5,12 @@ const Pool=require("../src/bd")
 
 //rutas
 
+const consultaFun=async(req,res)=>{
+    var {documento}=req.body;
+    var existencia=await validarExistencia(documento);
+    return res.status(200).json({"user":existencia});
+}
+
 const RegistroUser=async (req, res)=>{
     var {documento,usuario,contrasena,id_perfil}=req.body;
     var existencia=await validarExistencia(documento);
@@ -22,7 +28,7 @@ const RegistroUser=async (req, res)=>{
                 const consulta=await Pool.query("INSERT INTO tUser (usuario, clave, idperfil, iddell_user, estadocuenta) values ($1,$2,$3,$4,true)",[usuario,contrasenaEncriptada,id_perfil,existencia[0].iddell_user])
                 console.log(existencia[0].iddell_user);
                 console.log(usuario,contrasenaEncriptada);
-                return res.status(200).send("El usuario se pudo registrar");
+                return res.status(200).json({"Aprobacion":"El usuario se pudo registrar"});
            }catch(e){
                 return res.status(401).send(e);
             }
@@ -33,6 +39,9 @@ const RegistroUser=async (req, res)=>{
     }
    
 }
+
+
+
 
 
 
@@ -117,4 +126,4 @@ async function convertirContrasena(password){
     return password;
 }
 
-module.exports={RegistroUser, ingresoUser, changePassword}
+module.exports={RegistroUser, ingresoUser, changePassword, consultaFun}
