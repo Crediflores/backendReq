@@ -6,18 +6,20 @@ const Pool=require("../src/bd")
 //rutas
 
 const RegistroUser=async (req, res)=>{
-    var {documento,usuario,contrasena, nombre, correo, area, cargo, extension, id_perfil}=req.body;
+    var {documento,usuario,contrasena,id_perfil}=req.body;
     var existencia=await validarExistencia(documento);
-    if(existencia.length==0){
+    var existenciaUser=await validarExistenciaUser(existencia[0].iddell_user);
+    
+    if(existencia.length>0 && existenciaUser.length==0){
         
-        const registro=await registroEmpleado(documento,nombre,correo,area,cargo,extension)
+        //const registro=await registroEmpleado(documento,nombre,correo,area,cargo,extension)
 
             contrasenaEncriptada=await convertirContrasena(contrasena)
             console.log(contrasenaEncriptada)
-            console.log(registro)
+            
             //contrasenaEncriptada="S4n74"
             try{
-                const consulta=await Pool.query("INSERT INTO tUser (usuario, clave, idperfil, iddell_user, estadocuenta) values ($1,$2,$3,$4,true)",[usuario,contrasenaEncriptada,id_perfil,registro])
+                const consulta=await Pool.query("INSERT INTO tUser (usuario, clave, idperfil, iddell_user, estadocuenta) values ($1,$2,$3,$4,true)",[usuario,contrasenaEncriptada,id_perfil,existencia[0].iddell_user])
                 console.log(existencia[0].iddell_user);
                 console.log(usuario,contrasenaEncriptada);
                 return res.status(200).send("El usuario se pudo registrar");
@@ -27,7 +29,7 @@ const RegistroUser=async (req, res)=>{
        
     }else{
         console.log(existencia.length)
-        return res.status(401).send("El usuario ya existe");
+        return res.status(401).send("El usuario ya existe o aún el funcionario no se encuentra registrado.");
     }
    
 }
@@ -47,6 +49,11 @@ async function registroEmpleado(documento,nombre,correo,area,cargo,extension){
 
 async function validarExistencia(documento){
     const consulta=await Pool.query("SELECT * FROM Dell_User WHERE documento=$1",[documento]);   
+    return consulta.rows;
+}
+
+async function validarExistenciaUser(id){
+    const consulta=await Pool.query("SELECT * FROM tuser WHERE iddell_user=$1",[id]);
     return consulta.rows;
 }
 
