@@ -5,6 +5,49 @@ const Pool=require("../src/bd")
 
 //rutas
 
+const adminChangePass=async(req,res)=>{
+    var {id,password}=req.body;
+    contrasenaEncriptada=await convertirContrasena(password)
+    try{
+        const consulta=await Pool.query("UPDATE tuser SET clave=$1 WHERE iduser=$2",[contrasenaEncriptada,id])
+        return res.status(200).json({"Aprobacion":"La contraseña se pudo actualizar"});
+    }catch(e){
+        return res.status(401).send(e);
+    }
+
+
+}
+
+
+const areas=async(req,res)=>{
+    try{
+        const consulta=await Pool.query("select * from area");
+        return res.status(200).json(consulta.rows)
+    }catch(error){
+        return res.status(401).send(error);
+    }
+}
+
+
+const cargos=async(req, res)=>{
+    try{
+        const consulta=await Pool.query("select * from cargo");
+        return res.status(200).json(consulta.rows)
+    }catch(error){
+        return res.status(401).send(error);
+    }
+}
+
+
+const consultMasiva=async(req,res)=>{
+    try{
+        const consulta=await Pool.query("select * from tuser a inner join dell_user b on a.iddell_user=b.iddell_user" );
+        return res.status(200).json({"DatosUsuarios":consulta.rows});
+    }catch(error){
+        return res.status(401).send(error);
+    }
+}
+
 const consultaFun=async(req,res)=>{
     var {documento}=req.body;
     var existencia=await validarExistencia(documento);
@@ -126,4 +169,4 @@ async function convertirContrasena(password){
     return password;
 }
 
-module.exports={RegistroUser, ingresoUser, changePassword, consultaFun}
+module.exports={RegistroUser, ingresoUser, changePassword, consultaFun, consultMasiva, areas, cargos, adminChangePass}
